@@ -1,92 +1,195 @@
-# Dharma-dwar
-Dharma Dwar is an offline smart door access system that combines hand-gesture recognition and speech recognition for secure authentication. Using a camera and microphone, the door opens only when a closed fist is detected and the command “open the door” is spoken, then closes automatically after 5 seconds.
+🚪✨ Dharma Dwar
+🧠 Vision–Voice Based Smart Door Access System (Offline AI)
 
-System Description: Vision–Voice Based Smart Door Access System (Dharma Dwar)
+Dharma Dwar is an offline smart door access system that uses hand-gesture recognition ✋ and speech recognition 🎙️ as a two-factor authentication mechanism.
+The door opens only when:
 
-The Dharma Dwar system is an offline, multi-factor intelligent door access mechanism that combines computer vision and speech recognition to authorize entry in a secure and deterministic manner. The system is designed to operate on low-resource hardware such as the Raspberry Pi Zero 2 W, without relying on cloud services or paid APIs.
+A closed fist is detected ✊
 
-The system uses a USB camera for real-time hand-gesture recognition and a USB microphone for speech-to-text processing. Access is granted only when two independent conditions are simultaneously satisfied:
+The user speaks “open the door” 🗣️
 
-The user presents a closed fist gesture, and
+After opening, the door automatically closes after 5 seconds ⏱️.
 
-The user verbally issues the command “open the door.”
+🔒 No internet
+🔑 No API keys
+☁️ No cloud services
+🧩 Works on low-resource devices like Raspberry Pi Zero 2 W
 
-This dual-condition logic significantly reduces false positives and accidental activation, making the system more robust than single-input authentication methods.
+🧩 System Architecture (High Level)
 
-Hand Gesture Recognition Module
+📷 Camera → Hand Gesture Detection
+🎤 Microphone → Speech-to-Text
+🧠 Decision Logic → Two-Factor Authentication
+🚪 Door Control → Open → Auto-Close
 
-The vision subsystem is implemented using MediaPipe Hands and OpenCV. A live video stream is captured from the camera, and 21 anatomical hand landmarks are extracted per frame. The system evaluates finger joint positions by comparing finger tip landmarks with their corresponding proximal interphalangeal (PIP) joints.
+✋ Hand Gesture Recognition Module
 
-If four or more fingers are extended, the hand is classified as OPEN HAND. If the fingers are folded, the system classifies the gesture as a CLOSED FIST. A bounding box and gesture label are rendered in real time on the video feed to provide visual feedback to the user.
+Built using MediaPipe Hands 🖐️ and OpenCV 👁️
 
-The gesture state is continuously tracked and shared with the voice-processing logic through a global state variable.
+Detects 21 hand landmarks per frame
 
-Speech-to-Text Processing Module
+Compares:
 
-The speech recognition subsystem is powered by Vosk, an offline speech-to-text engine optimized for embedded devices. Audio is captured in real time using the SoundDevice library at a sample rate of 16 kHz, which is ideal for speech recognition accuracy while minimizing CPU and memory usage.
+Finger tips vs PIP joints
 
-The recognized text is processed incrementally. When a complete phrase is detected, it is parsed to check for the presence of the command “open the door.” The final recognized sentence is displayed on the video feed for transparency and debugging purposes.
+Gesture classification:
 
-Because the speech model runs entirely offline, the system remains functional even without internet connectivity and avoids privacy risks associated with cloud-based voice processing.
+🟢 OPEN HAND (4+ fingers extended)
 
-Authentication and Decision Logic
+🔴 CLOSED FIST (fingers folded)
 
-The core authentication logic acts as a two-factor gate:
+📦 Real-time bounding box + label displayed on video feed
 
-Factor 1: Gesture must be CLOSED FIST
+Gesture status is continuously tracked and shared with the voice module.
 
-Factor 2: Voice command must match “open the door”
+🎙️ Speech-to-Text Module (Offline)
 
-Only when both conditions are true does the system initiate the door-opening sequence. If the voice command is detected without the correct hand gesture, access is explicitly denied.
+Powered by Vosk (Offline STT Engine)
 
-This logic is implemented using thread-safe state management to prevent multiple triggers or race conditions.
+Uses SoundDevice for real-time audio capture
 
-Door Control and Timing Mechanism
+Audio format:
 
-Upon successful authentication, the system simulates door actuation by printing “OPENING DOOR” and starting a countdown timer. After a fixed delay of 5 seconds, the system automatically transitions the door state back to CLOSED, printing “CLOSING DOOR.”
+16-bit PCM
 
-In the current implementation, this behavior is represented using print statements. However, the design is hardware-agnostic and can be directly extended to control a servo motor or electronic lock using GPIO pins.
+16 kHz sample rate
 
-Concurrency and Performance Design
+Recognizes speech locally (no internet required)
 
-The system uses multi-threading to ensure smooth performance:
+📝 Last recognized command shown on screen
 
-The camera and gesture detection run in the main thread.
+This ensures privacy, reliability, and low latency.
 
-The speech recognition engine runs in a background daemon thread.
+🔐 Authentication & Decision Logic
 
-This architecture prevents audio processing from blocking video rendering, ensuring real-time responsiveness even on constrained hardware.
+Access is granted only when BOTH conditions are true:
 
-Key Features
+✔️ Gesture = CLOSED FIST
+✔️ Voice command = “open the door”
 
-Fully offline operation
+❌ Voice without gesture → Access denied
+❌ Gesture without voice → Ignored
 
-Dual-factor authentication (gesture + voice)
+Thread-safe logic prevents repeated or accidental triggers.
 
-Real-time visual feedback
+⏱️ Door Control & Timing Logic
 
-Low memory and CPU footprint
+Prints 🚪 OPENING DOOR
 
-Modular and hardware-extensible design
+Starts a 5-second timer
 
-No cloud dependency or API keys required
+Automatically prints 🔒 CLOSING DOOR
 
-Applications and Future Scope
+🧪 Currently simulated using print()
+⚙️ Easily extendable to:
 
-The Dharma Dwar system can be deployed in:
+Servo motors
 
-Smart homes
+Solenoid locks
 
-Secure rooms or lockers
+Relay modules via GPIO
 
-Robotics projects
+🧵 Concurrency & Performance
 
-Assistive technology interfaces
+Multi-threaded design
 
-AI-based access control research
+Main thread → Camera + gesture detection
 
-Future enhancements may include face recognition, speaker feedback, gesture confidence thresholds, mobile dashboards, and encrypted user profiles.
+Background thread → Speech recognition
 
-Final Note
+Prevents audio blocking video
 
-This system is not a gimmick—it is a correctly engineered embedded AI access control pipeline. The architecture follows real-world design principles used in industrial human–machine interaction systems, scaled intelligently for student-level hardware.
+Runs smoothly on constrained hardware
+
+📦 Required Hardware
+Component	Purpose
+📷 USB Camera	Hand detection
+🎤 USB Microphone	Voice input
+💻 Raspberry Pi / PC	Processing
+🔌 Power Supply	Stable operation
+
+(Servo/lock optional for future upgrades)
+
+📚 Required Software & Libraries
+🐍 Python Version
+
+Python 3.9 – 3.11 recommended
+
+📦 Python Libraries
+
+Install all dependencies using:
+
+pip install opencv-python mediapipe numpy sounddevice vosk
+
+📌 Library Purpose
+Library	Use
+opencv-python -------------	Camera & image processing
+mediapipe	------------- Hand landmark detection
+numpy	------------- Math & array operations
+sounddevice	------------- Microphone audio stream
+vosk -------------	Offline speech recognition
+json -------------	STT result parsing
+threading -------------	Multi-threading
+queue -------------	Audio buffering
+
+📥 Download Vosk Model
+
+Download a small English model:
+
+🔗 https://alphacephei.com/vosk/models
+
+Recommended:
+
+vosk-model-small-en-us-0.15
+
+
+Place it inside:
+
+models/
+└── vosk-model-small-en-us-0.15/
+
+▶️ How to Run (Beginner Steps)
+git clone https://github.com/yourusername/dharma-dwar.git
+cd dharma-dwar
+python main.py
+
+
+🖐️ Show a closed fist
+🗣️ Say “open the door”
+🚪 Watch the system respond
+
+Press ESC to exit.
+
+🌟 Key Features
+
+✅ Fully offline AI
+✅ Gesture + voice security
+✅ Real-time visual feedback
+✅ Low RAM & CPU usage
+✅ Modular & extendable
+✅ Beginner-friendly code
+
+🚀 Applications & Future Scope
+
+🏠 Smart Homes
+🔐 Secure Rooms
+🤖 Robotics
+♿ Assistive Tech
+🧪 AI Research
+
+🔮 Future Enhancements:
+
+👤 Face recognition
+
+🔊 Voice feedback
+
+📱 Mobile dashboard
+
+🔐 Encrypted user profiles
+
+⚙️ Servo / lock integration
+
+🧠 Final Note
+
+This is not a toy project.
+It is a proper embedded AI access-control system following real-world human–machine interaction principles — scaled intelligently for learning and experimentation.
